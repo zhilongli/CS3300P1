@@ -1,0 +1,253 @@
+<html>
+
+<head>
+
+ <title>INFO 3300: P1
+ </title>
+ <h2>CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
+
+
+
+ <script src="https://d3js.org/d3.v5.min.js"></script>
+ <style>
+  .legend span {
+   margin-right: 10px;
+  }
+ </style>
+</head>
+
+<body>
+ Main text here: what story do we want to tell with our visualization
+ <br><br>
+ <svg id="fig1" height=500 width=800 style="background-color: ghostwhite">
+ </svg>
+ <div id="simpleLegend" class="legend"> </div>
+ <script>
+  var health_data;
+  let svg = d3.select("svg#fig1");
+  d3.json("p1_data.json").then(function(data) {
+   health_data = data;
+   //first build the dataset for 2016
+   data = data.filter(d => d["Year"] == 2016);
+   console.log(data);
+
+   //define margins
+   let margin = {
+    top: 10,
+    right: 10,
+    bottom: 20,
+    left: 50
+   };
+
+   let width = svg.attr("width");
+   let height = svg.attr("height");
+   //Create scales
+   let xScale = d3.scaleLinear()
+    .domain([0, 90])
+    .range([margin.left, width - margin.right]);
+
+   let yScale = d3.scaleLinear()
+    .domain([0, 100])
+    .range([height - margin.bottom, margin.top]);
+
+   let colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+   // let xTicks = ["All", "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54",
+   //  "55-64", "65-74", "75-84", ">85"
+   // ];
+
+   let xTicks = [1, 5, 15, 25, 35, 45, 55, 65, 75, 85];
+   //create the x and y axes
+   let bottomAxis = d3.axisBottom(xScale).tickValues(xTicks);
+   let leftAxis = d3.axisLeft(yScale);
+   svg.append("g")
+    .attr("transform", "translate(" + margin.left + ", 0" + ")")
+    .call(leftAxis);
+   svg.append("g")
+    .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+    .call(bottomAxis);
+
+   //create a function to plot the lines, [arr] is the input data array with x and y values
+   // element.x represents the age group and element.y represents the percentage of total deaths
+   function plotLine(arr, color) {
+    var line = d3.line()
+     .x(function(d, i) {
+      return xScale(d.x);
+     })
+     .y(function(d, i) {
+      return yScale(d.y);
+     });
+    svg.append("path")
+     .datum(arr)
+     .attr("stroke", color)
+     .attr("stroke-width", 5)
+     .attr("d", line)
+     .style("fill", color);
+   };
+
+
+   //Define a function to remove bad values and sum up with previous data
+   function add_data(new_data, prev_data) {
+    // console.log("OLD DATA");
+    // console.log(new_data);
+    var tempList = [];
+    var ret = {
+     "0": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 0,
+      "9": 0,
+      "10": 0
+     }
+    }
+    for (var i = 0; i < 11; i++) {
+     if (new_data["0"][i.toString()] == "*" || new_data["0"][i.toString()] == "…") {
+      ret["0"][i.toString()] = (prev_data["0"][i.toString()] + 0);
+     } else if (prev_data["0"][i.toString()] == "*" || prev_data["0"][i.toString()] == "…") {
+      ret["0"][i.toString()] = (new_data["0"][i.toString()] + 0);
+     } else {
+      ret["0"][i.toString()] = (new_data["0"][i.toString()] + prev_data["0"][i.toString()]);
+     };
+    };
+    // console.log("TEMP LIST")
+    // console.log(tempList);
+    // var ret = {
+    //  "0": {
+    //   "0": tempList[0],
+    //   "1": tempList[1],
+    //   "2": tempList[2],
+    //   "3": tempList[3],
+    //   "4": tempList[4],
+    //   "5": tempList[5],
+    //   "6": tempList[6],
+    //   "7": tempList[7],
+    //   "8": tempList[8],
+    //   "9": tempList[9],
+    //   "10": tempList[10]
+    //  }
+    // };
+    console.log("NEW DATA");
+    console.log(ret);
+
+    return ret;
+   };
+
+   //now go through the data and get the array points to be plotted
+   let data_all = data.filter(d => d["Cause"] == "All causes");
+   let data_heart = data.filter(d => d["Cause"] == "Diseases of the heart");
+   let data_accidents = add_data(data.filter(d => d["Cause"] == "Accidents"), data_heart);
+   let data_flu = add_data(data.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents);
+   let data_suicide = add_data(data.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
+   let data_drug = add_data(data.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
+   let data_alcohol = add_data(data.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
+
+   //age group legend
+   // let age_legend = {
+   //  {
+   //   "index": 0,
+   //   "age group": "Under 1 year"
+   //  },
+   //  {
+   //   "index": 1,
+   //   "age group": "1 to 4"
+   //  },
+   //  {
+   //   "index": 2,
+   //   "age group": "5 to 14"
+   //  },
+   //  {
+   //   "index": 3,
+   //   "age group": "15 to 24"
+   //  },
+   //  {
+   //   "index": 4,
+   //   "age group": "25 to 34"
+   //  },
+   //  {
+   //   "index": 5,
+   //   "age group": "35 to 44"
+   //  },
+   //  {
+   //   "index": 6,
+   //   "age group": "45 to 54"
+   //  },
+   //  {
+   //   "index": 7,
+   //   "age group": "55 to 64"
+   //  },
+   //  {
+   //   "index": 8,
+   //   "age group": "65 to 74"
+   //  },
+   //  {
+   //   "index": 9,
+   //   "age group": "75 to 84"
+   //  },
+   //  {
+   //   "index": 10,
+   //   "age group": "85 and above"
+   //  }
+   // };
+
+   //Define a function that populates an object array for the cause type,
+   //each object has x and y attributes.
+   function populate_array(cause_data) {
+    var ret = [];
+    var elt_i;
+    var elt_0 = {
+     x: 0.5,
+     y: cause_data["0"]["0"] / (data_all["0"]["0"]) * 100
+    };
+    var elt_1 = {
+     x: 2.5,
+     y: cause_data["0"]["1"] / (data_all["0"]["1"]) * 100
+    };
+    ret.push(elt_0);
+    ret.push(elt_1);
+
+    for (var i = 2; i < 11; i++) {
+     console.log(i.toString());
+     elt_i = {
+      x: (i - 1) * 10,
+      y: (cause_data["0"][i.toString()]) / (data_all["0"][i.toString()]) * 100
+     };
+     ret.push(elt_i);
+    };
+    ret.push({
+     x: 90,
+     y: 0
+    }); //add a last point to close the region
+    ret.push({
+     x: 0,
+     y: 0
+    }); //add a last point to close the region
+    console.log(ret);
+    return ret;
+   };
+   plotLine(populate_array(data_all), colorScale("all"));
+   plotLine(populate_array(data_alcohol), colorScale("alcohol"));
+   plotLine(populate_array(data_drug), colorScale("drug"));
+   plotLine(populate_array(data_suicide), colorScale("suicide"));
+   plotLine(populate_array(data_flu), colorScale("flu"));
+   plotLine(populate_array(data_accidents), colorScale("accidents"));
+   plotLine(populate_array(data_heart), colorScale("heart"));
+
+   //Create the legend
+   colorScale.domain().forEach(function(d, i) {
+    d3.select("#simpleLegend")
+     .append("span").text(d)
+     .style("color", colorScale(d));
+   });
+  });
+ </script>
+
+</body>
+
+
+</html>
