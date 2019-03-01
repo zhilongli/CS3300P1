@@ -22,15 +22,21 @@
  <svg id="fig1" height=500 width=800 style="background-color: ghostwhite">
  </svg>
  <div id="simpleLegend" class="legend"> </div>
+ <br>
+ <svg id="fig2" height=500 width=800 style="background-color: ghostwhite">
+ </svg>
+ <br>
+ <svg id="fig3" height=500 width=800 style="background-color: ghostwhite">
+ </svg>
  <script>
-  var health_data;
   let svg = d3.select("svg#fig1");
+  let svg_1999 = d3.select("svg#fig2");
+  let svg_heart = d3.select("svg#fig3");
   d3.json("p1_data.json").then(function(data) {
-   health_data = data;
    //first build the dataset for 2016
-   data = data.filter(d => d["Year"] == 2016);
-   console.log(data);
-
+   let heart_data = data.filter(d => d["Cause"] == "Diseases of the heart");
+   let data_2016 = data.filter(d => d["Year"] == 2016);
+   let data_1999 = data.filter(d => d["Year"] == 1999);
    //define margins
    let margin = {
     top: 10,
@@ -60,16 +66,25 @@
    //create the x and y axes
    let bottomAxis = d3.axisBottom(xScale).tickValues(xTicks);
    let leftAxis = d3.axisLeft(yScale);
+   //append to the first svg
    svg.append("g")
     .attr("transform", "translate(" + margin.left + ", 0" + ")")
     .call(leftAxis);
    svg.append("g")
     .attr("transform", "translate(0," + (height - margin.bottom) + ")")
     .call(bottomAxis);
+   //append to the second svg
+   svg_1999.append("g")
+    .attr("transform", "translate(" + margin.left + ", 0" + ")")
+    .call(leftAxis);
+   svg_1999.append("g")
+    .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+    .call(bottomAxis);
+
 
    //create a function to plot the lines, [arr] is the input data array with x and y values
    // element.x represents the age group and element.y represents the percentage of total deaths
-   function plotLine(arr, color) {
+   function plotLine(arr, color, svg_name) {
     var line = d3.line()
      .x(function(d, i) {
       return xScale(d.x);
@@ -77,7 +92,7 @@
      .y(function(d, i) {
       return yScale(d.y);
      });
-    svg.append("path")
+    svg_name.append("path")
      .datum(arr)
      .attr("stroke", color)
      .attr("stroke-width", 5)
@@ -115,37 +130,27 @@
       ret["0"][i.toString()] = (new_data["0"][i.toString()] + prev_data["0"][i.toString()]);
      };
     };
-    // console.log("TEMP LIST")
-    // console.log(tempList);
-    // var ret = {
-    //  "0": {
-    //   "0": tempList[0],
-    //   "1": tempList[1],
-    //   "2": tempList[2],
-    //   "3": tempList[3],
-    //   "4": tempList[4],
-    //   "5": tempList[5],
-    //   "6": tempList[6],
-    //   "7": tempList[7],
-    //   "8": tempList[8],
-    //   "9": tempList[9],
-    //   "10": tempList[10]
-    //  }
-    // };
-    console.log("NEW DATA");
-    console.log(ret);
 
     return ret;
    };
 
    //now go through the data and get the array points to be plotted
-   let data_all = data.filter(d => d["Cause"] == "All causes");
-   let data_heart = data.filter(d => d["Cause"] == "Diseases of the heart");
-   let data_accidents = add_data(data.filter(d => d["Cause"] == "Accidents"), data_heart);
-   let data_flu = add_data(data.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents);
-   let data_suicide = add_data(data.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
-   let data_drug = add_data(data.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
-   let data_alcohol = add_data(data.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
+   let data_all = data_2016.filter(d => d["Cause"] == "All causes");
+   let data_heart = data_2016.filter(d => d["Cause"] == "Diseases of the heart");
+   let data_accidents = add_data(data_2016.filter(d => d["Cause"] == "Accidents"), data_heart);
+   let data_flu = add_data(data_2016.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents);
+   let data_suicide = add_data(data_2016.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
+   let data_drug = add_data(data_2016.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
+   let data_alcohol = add_data(data_2016.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
+
+   //get the 1999 data
+   let data_all_1999 = data_1999.filter(d => d["Cause"] == "All causes");
+   let data_heart_1999 = data_1999.filter(d => d["Cause"] == "Diseases of the heart");
+   let data_accidents_1999 = add_data(data_1999.filter(d => d["Cause"] == "Accidents"), data_heart_1999);
+   let data_flu_1999 = add_data(data_1999.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents_1999);
+   let data_suicide_1999 = add_data(data_1999.filter(d => d["Cause"] == "Intentional self-harm"), data_flu_1999);
+   let data_drug_1999 = add_data(data_1999.filter(d => d["Cause"] == "Drug-induced"), data_suicide_1999);
+   let data_alcohol_1999 = add_data(data_1999.filter(d => d["Cause"] == "Alcohol-induced"), data_drug_1999);
 
    //age group legend
    // let age_legend = {
@@ -197,25 +202,24 @@
 
    //Define a function that populates an object array for the cause type,
    //each object has x and y attributes.
-   function populate_array(cause_data) {
+   function populate_array(cause_data, all_data) {
     var ret = [];
     var elt_i;
     var elt_0 = {
      x: 0.5,
-     y: cause_data["0"]["0"] / (data_all["0"]["0"]) * 100
+     y: cause_data["0"]["0"] / (all_data["0"]["0"]) * 100
     };
     var elt_1 = {
      x: 2.5,
-     y: cause_data["0"]["1"] / (data_all["0"]["1"]) * 100
+     y: cause_data["0"]["1"] / (all_data["0"]["1"]) * 100
     };
     ret.push(elt_0);
     ret.push(elt_1);
 
     for (var i = 2; i < 11; i++) {
-     console.log(i.toString());
      elt_i = {
       x: (i - 1) * 10,
-      y: (cause_data["0"][i.toString()]) / (data_all["0"][i.toString()]) * 100
+      y: (cause_data["0"][i.toString()]) / (all_data["0"][i.toString()]) * 100
      };
      ret.push(elt_i);
     };
@@ -227,22 +231,51 @@
      x: 0,
      y: 0
     }); //add a last point to close the region
-    console.log(ret);
     return ret;
    };
-   plotLine(populate_array(data_all), colorScale("all"));
-   plotLine(populate_array(data_alcohol), colorScale("alcohol"));
-   plotLine(populate_array(data_drug), colorScale("drug"));
-   plotLine(populate_array(data_suicide), colorScale("suicide"));
-   plotLine(populate_array(data_flu), colorScale("flu"));
-   plotLine(populate_array(data_accidents), colorScale("accidents"));
-   plotLine(populate_array(data_heart), colorScale("heart"));
+   plotLine(populate_array(data_all, data_all), colorScale("all"), svg);
+   plotLine(populate_array(data_alcohol, data_all), colorScale("alcohol"), svg);
+   plotLine(populate_array(data_drug, data_all), colorScale("drug"), svg);
+   plotLine(populate_array(data_suicide, data_all), colorScale("suicide"), svg);
+   plotLine(populate_array(data_flu, data_all), colorScale("flu"), svg);
+   plotLine(populate_array(data_accidents, data_all), colorScale("accidents"), svg);
+   plotLine(populate_array(data_heart, data_all), colorScale("heart"), svg);
+
+
+   plotLine(populate_array(data_all_1999, data_all_1999), colorScale("all"), svg_1999);
+   plotLine(populate_array(data_alcohol_1999, data_all_1999), colorScale("alcohol"), svg_1999);
+   plotLine(populate_array(data_drug_1999, data_all_1999), colorScale("drug"), svg_1999);
+   plotLine(populate_array(data_suicide_1999, data_all_1999), colorScale("suicide"), svg_1999);
+   plotLine(populate_array(data_flu_1999, data_all_1999), colorScale("flu"), svg_1999);
+   plotLine(populate_array(data_accidents_1999, data_all_1999), colorScale("accidents"), svg_1999);
+   plotLine(populate_array(data_heart_1999, data_all_1999), colorScale("heart"), svg_1999);
 
    //Create the legend
    colorScale.domain().forEach(function(d, i) {
     d3.select("#simpleLegend")
      .append("span").text(d)
      .style("color", colorScale(d));
+   });
+   //TODO now plot heatmap!
+   let hm_xScale = d3.scaleLinear()
+    .domain([1999, 2016])
+    .range([0, width]);
+   let hm_yScale = d3.scaleLinear()
+    .domain([0, 10])
+    .range([0, height]);
+   console.log("1999 DATA");
+   console.log(data_1999);
+   let gridSize = hm_xScale(2000);
+   heart_data.forEach(function(d, i) {
+    var yr = Number(d["Year"]);
+    for (var i = 0; i < 11; i++) {
+     svg_heart.append('rect')
+      .attr('x', hm_xScale(yr))
+      .attr('y', hm_yScale(i))
+      .attr('width', gridSize - 5)
+      .attr('height', gridSize)
+      .style('fill', 'lightgrey');
+    };
    });
   });
  </script>
