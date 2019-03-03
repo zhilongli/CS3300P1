@@ -6,9 +6,8 @@
  </title>
  <h2>CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
 
-
-
  <script src="https://d3js.org/d3.v5.min.js"></script>
+
  <style>
   .legend span {
    margin-right: 10px;
@@ -42,12 +41,27 @@
   </svg>
   <div id="simpleLegend" class="legend"> </div>
   <br>
-  <svg id="fig3" height=170 width=400 style="background-color: ghostwhite">
+  Here is the heatmap for percentage changes in heart-related deaths across the
+  age groups over the years. <br>
+  <svg id="fig3" height=200 width=550 style="background-color: ghostwhite">
+  </svg>
+  <br>
+  Here is the heatmap for percentage changes in suicide deaths across the
+  age groups over the years. <br>
+  <svg id="fig4" height=200 width=550 style="background-color: ghostwhite">
+  </svg>
+  <br>
+  Here is the heatmap for percentage changes in drug induced deaths across the
+  age groups over the years. <br>
+  <svg id="fig5" height=200 width=550 style="background-color: ghostwhite">
   </svg>
   <script>
    let svg = d3.select("svg#fig2");
    let svg_2016 = d3.select("svg#fig1");
    let svg_heart = d3.select("svg#fig3");
+   let svg_suicide = d3.select("svg#fig4");
+   let svg_drug = d3.select("svg#fig5");
+
    d3.json("p1_data.json").then(function(data) {
     //first build the dataset for 2016
     var heart_data = data.filter(d => d["Cause"] == "Diseases of the heart");
@@ -250,7 +264,7 @@
      }); //add a last point to close the region
      return ret;
     };
-    plotLine(populate_array(data_all, data_all), colorScale("all"), svg);
+    plotLine(populate_array(data_all, data_all), colorScale("others"), svg);
     plotLine(populate_array(data_alcohol, data_all), colorScale("alcohol"), svg);
     plotLine(populate_array(data_drug, data_all), colorScale("drug"), svg);
     plotLine(populate_array(data_suicide, data_all), colorScale("suicide"), svg);
@@ -259,7 +273,7 @@
     plotLine(populate_array(data_heart, data_all), colorScale("heart"), svg);
 
 
-    plotLine(populate_array(data_all_1999, data_all_1999), colorScale("all"), svg_2016);
+    plotLine(populate_array(data_all_1999, data_all_1999), colorScale("others"), svg_2016);
     plotLine(populate_array(data_alcohol_1999, data_all_1999), colorScale("alcohol"), svg_2016);
     plotLine(populate_array(data_drug_1999, data_all_1999), colorScale("drug"), svg_2016);
     plotLine(populate_array(data_suicide_1999, data_all_1999), colorScale("suicide"), svg_2016);
@@ -295,32 +309,101 @@
      };
      return ret;
     };
+
+    let hm_margin = {
+     top: 10,
+     right: 40,
+     bottom: 20,
+     left: 30
+    };
+    //we need an array mapping row to age group for axis label
+    let age_array = ["", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64"];
     let heat_width = svg_heart.attr("width");
     let heat_height = svg_heart.attr("height");
     let hm_xScale = d3.scaleLinear()
-     .domain([2000, 2016])
-     .range([0, heat_width]);
-    let hm_yScale = d3.scaleLinear()
-     .domain([0, 10])
-     .range([0, heat_height]);
+     .domain([1999, 2017])
+     .range([hm_margin.left, heat_width - hm_margin.right]);
+    let hm_yScale = d3.scalePoint()
+     .domain(age_array)
+     .range([heat_height - hm_margin.bottom + 10, hm_margin.top]);
     //NOTE to use the heatmap colorscale we need to normalize data to between 0 and 1
-    var heatScale = d3.scaleSequential(d3.interpolateRdYlGn);
-    let gridSize = hm_xScale(2001) - 5;
-    heart_data.forEach(function(d, i) {
-     console.log(i);
-     var yr = Number(d["Year"]);
-     var percent_arr;
+    var heatScale = d3.scaleSequential(d3.interpolateReds);
+    let gridSize = 23;
+
+    //create the x and y axes
+    let hm_bottomAxis = d3.axisBottom(hm_xScale).ticks(5).tickSize(0);
+    let hm_leftAxis = d3.axisLeft(hm_yScale).tickSize(0);
+    //append to the first svg
+    svg_heart.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+    svg_heart.append("g")
+     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+     .call(hm_bottomAxis);
+
+    //append to the second svg
+    svg_suicide.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+    svg_suicide.append("g")
+     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+     .call(hm_bottomAxis);
+
+
+    //append to the drug svg
+    svg_drug.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+    svg_drug.append("g")
+     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+     .call(hm_bottomAxis);
+    //Create a function to plot the heatmaps for specific causes
+    //[cause] is a string representing the cause of death we are plotting
+    function plot_hm(cause, svg_cause) {
+     var yr;
+     var percent_arr = [];
+     var row;
+     //Need to get minmax of the whole array to define the scale domain
      for (var j = 2; j < 8; j++) {
-      percent_arr = get_derivative("Diseases of the heart", j);
-      heatScale.domain(d3.extent(percent_arr));
-      svg_heart.append('rect')
-       .attr('x', hm_xScale(yr))
-       .attr('y', gridSize * (j - 2) + j * 5)
+      console.log(get_derivative(cause, j));
+      percent_arr = percent_arr.concat(get_derivative(cause, j));
+     };
+     console.log(percent_arr);
+     heatScale.domain(d3.extent(percent_arr));
+     // percent_arr = get_derivative("Diseases of the heart", j);
+     percent_arr.forEach(function(d, i) {
+      yr = i % 17 + 2000;
+      row = Math.floor(i / 17);
+      console.log(row);
+
+      let rect = svg_cause.append('rect')
+       .attr('x', hm_xScale(yr) - 10)
+       .attr('y', gridSize * (row) + row * 7)
        .attr('width', gridSize)
        .attr('height', gridSize)
        .style('fill', heatScale(percent_arr[i]));
-     };
-    });
+      rect.on("mouseover", function() {
+       svg_cause.append("text")
+        // IDs have strict requirements on allowable characters ( https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id )
+        .attr("id", "label") // We need to be able to find this to remove it later, so lets store an ID
+        .attr("x", hm_xScale(yr) - 10)
+        .attr("y", gridSize * (row) + row * 7)
+        .text(percent_arr[i]);
+
+      });
+      rect.on("mouseout", function() {
+       d3.select("#label").remove();
+      });
+
+
+      //TODO now need to create a colorbar for the color legend
+
+     });
+    };
+    plot_hm("Diseases of the heart", svg_heart);
+    plot_hm("Intentional self-harm", svg_suicide);
+    plot_hm("Drug-induced", svg_drug);
+
    });
   </script>
  </div>
