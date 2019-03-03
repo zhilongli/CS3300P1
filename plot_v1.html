@@ -1,7 +1,7 @@
 <html>
 
 <head>
-
+ <meta name="viewport" content="width=device-width, initial-scale=1">
  <title>INFO 3300: P1
  </title>
  <h2>CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
@@ -13,273 +13,317 @@
   .legend span {
    margin-right: 10px;
   }
+
+  .content {
+   max-width: 1050px;
+   margin: auto;
+  }
+
+  div {
+   text-align: justify;
+   text-justify: inter-word;
+  }
  </style>
 </head>
 
 <body>
- Main text here: what story do we want to tell with our visualization
- <br><br>
- <svg id="fig1" height=500 width=800 style="background-color: ghostwhite">
- </svg>
- <div id="simpleLegend" class="legend"> </div>
- <br>
- <svg id="fig2" height=500 width=800 style="background-color: ghostwhite">
- </svg>
- <br>
- <svg id="fig3" height=500 width=800 style="background-color: ghostwhite">
- </svg>
- <script>
-  let svg = d3.select("svg#fig1");
-  let svg_1999 = d3.select("svg#fig2");
-  let svg_heart = d3.select("svg#fig3");
-  d3.json("p1_data.json").then(function(data) {
-   //first build the dataset for 2016
-   let heart_data = data.filter(d => d["Cause"] == "Diseases of the heart");
-   let data_2016 = data.filter(d => d["Year"] == 2016);
-   let data_1999 = data.filter(d => d["Year"] == 1999);
-   //define margins
-   let margin = {
-    top: 10,
-    right: 10,
-    bottom: 20,
-    left: 50
-   };
+ <div class="content">
+  The stacked line chart on the left shows the leading causes of death in the
+  United States in 1999, and the chart on the right shows the same data in 2016.
+  From the charts we can observe some worrying trends: a significantly higher percentage
+  of drug-related deaths, and higher rates of suicide among young people in 2016.
+  <br>
+  How can we dig deeper into these trends? Let us look at the years in which the percentages increased
+  for each age group in the heatmap below.
+  <br><br>
+  <svg id="fig1" height=400 width=500 style="background-color: ghostwhite">
+  </svg>
+  <svg id="fig2" height=400 width=500 style="background-color: ghostwhite">
+  </svg>
+  <div id="simpleLegend" class="legend"> </div>
+  <br>
+  <svg id="fig3" height=170 width=400 style="background-color: ghostwhite">
+  </svg>
+  <script>
+   let svg = d3.select("svg#fig2");
+   let svg_2016 = d3.select("svg#fig1");
+   let svg_heart = d3.select("svg#fig3");
+   d3.json("p1_data.json").then(function(data) {
+    //first build the dataset for 2016
+    var heart_data = data.filter(d => d["Cause"] == "Diseases of the heart");
+    heart_data = heart_data.filter(d => d["Year"] > 1999);
+    let data_2016 = data.filter(d => d["Year"] == 2016);
+    let data_1999 = data.filter(d => d["Year"] == 1999);
+    //define margins
+    let margin = {
+     top: 10,
+     right: 10,
+     bottom: 20,
+     left: 50
+    };
 
-   let width = svg.attr("width");
-   let height = svg.attr("height");
-   //Create scales
-   let xScale = d3.scaleLinear()
-    .domain([0, 90])
-    .range([margin.left, width - margin.right]);
+    let width = svg.attr("width");
+    let height = svg.attr("height");
+    //Create scales
+    let xScale = d3.scaleLinear()
+     .domain([0, 90])
+     .range([margin.left, width - margin.right]);
 
-   let yScale = d3.scaleLinear()
-    .domain([0, 100])
-    .range([height - margin.bottom, margin.top]);
+    let yScale = d3.scaleLinear()
+     .domain([0, 100])
+     .range([height - margin.bottom, margin.top]);
 
-   let colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    let colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-   // let xTicks = ["All", "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54",
-   //  "55-64", "65-74", "75-84", ">85"
-   // ];
+    // let xTicks = ["All", "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54",
+    //  "55-64", "65-74", "75-84", ">85"
+    // ];
 
-   let xTicks = [1, 5, 15, 25, 35, 45, 55, 65, 75, 85];
-   //create the x and y axes
-   let bottomAxis = d3.axisBottom(xScale).tickValues(xTicks);
-   let leftAxis = d3.axisLeft(yScale);
-   //append to the first svg
-   svg.append("g")
-    .attr("transform", "translate(" + margin.left + ", 0" + ")")
-    .call(leftAxis);
-   svg.append("g")
-    .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-    .call(bottomAxis);
-   //append to the second svg
-   svg_1999.append("g")
-    .attr("transform", "translate(" + margin.left + ", 0" + ")")
-    .call(leftAxis);
-   svg_1999.append("g")
-    .attr("transform", "translate(0," + (height - margin.bottom) + ")")
-    .call(bottomAxis);
-
-
-   //create a function to plot the lines, [arr] is the input data array with x and y values
-   // element.x represents the age group and element.y represents the percentage of total deaths
-   function plotLine(arr, color, svg_name) {
-    var line = d3.line()
-     .x(function(d, i) {
-      return xScale(d.x);
-     })
-     .y(function(d, i) {
-      return yScale(d.y);
-     });
-    svg_name.append("path")
-     .datum(arr)
-     .attr("stroke", color)
-     .attr("stroke-width", 5)
-     .attr("d", line)
-     .style("fill", color);
-   };
+    let xTicks = [1, 5, 15, 25, 35, 45, 55, 65, 75, 85];
+    //create the x and y axes
+    let bottomAxis = d3.axisBottom(xScale).tickValues(xTicks);
+    let leftAxis = d3.axisLeft(yScale);
+    //append to the first svg
+    svg.append("g")
+     .attr("transform", "translate(" + margin.left + ", 0" + ")")
+     .call(leftAxis);
+    svg.append("g")
+     .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+     .call(bottomAxis);
+    //append to the second svg
+    svg_2016.append("g")
+     .attr("transform", "translate(" + margin.left + ", 0" + ")")
+     .call(leftAxis);
+    svg_2016.append("g")
+     .attr("transform", "translate(0," + (height - margin.bottom) + ")")
+     .call(bottomAxis);
 
 
-   //Define a function to remove bad values and sum up with previous data
-   function add_data(new_data, prev_data) {
-    // console.log("OLD DATA");
-    // console.log(new_data);
-    var tempList = [];
-    var ret = {
-     "0": {
-      "0": 0,
-      "1": 0,
-      "2": 0,
-      "3": 0,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 0,
-      "8": 0,
-      "9": 0,
-      "10": 0
+    //create a function to plot the lines, [arr] is the input data array with x and y values
+    // element.x represents the age group and element.y represents the percentage of total deaths
+    function plotLine(arr, color, svg_name) {
+     var line = d3.line()
+      .x(function(d, i) {
+       return xScale(d.x);
+      })
+      .y(function(d, i) {
+       return yScale(d.y);
+      });
+     svg_name.append("path")
+      .datum(arr)
+      .attr("stroke", color)
+      .attr("stroke-width", 5)
+      .attr("d", line)
+      .style("fill", color);
+    };
+
+
+    //Define a function to remove bad values and sum up with previous data
+    function add_data(new_data, prev_data) {
+     // console.log("OLD DATA");
+     // console.log(new_data);
+     var tempList = [];
+     var ret = {
+      "0": {
+       "0": 0,
+       "1": 0,
+       "2": 0,
+       "3": 0,
+       "4": 0,
+       "5": 0,
+       "6": 0,
+       "7": 0,
+       "8": 0,
+       "9": 0,
+       "10": 0
+      }
      }
-    }
-    for (var i = 0; i < 11; i++) {
-     if (new_data["0"][i.toString()] == "*" || new_data["0"][i.toString()] == "…") {
-      ret["0"][i.toString()] = (prev_data["0"][i.toString()] + 0);
-     } else if (prev_data["0"][i.toString()] == "*" || prev_data["0"][i.toString()] == "…") {
-      ret["0"][i.toString()] = (new_data["0"][i.toString()] + 0);
-     } else {
-      ret["0"][i.toString()] = (new_data["0"][i.toString()] + prev_data["0"][i.toString()]);
+     for (var i = 0; i < 11; i++) {
+      if (new_data["0"][i.toString()] == "*" || new_data["0"][i.toString()] == "…") {
+       ret["0"][i.toString()] = (prev_data["0"][i.toString()] + 0);
+      } else if (prev_data["0"][i.toString()] == "*" || prev_data["0"][i.toString()] == "…") {
+       ret["0"][i.toString()] = (new_data["0"][i.toString()] + 0);
+      } else {
+       ret["0"][i.toString()] = (new_data["0"][i.toString()] + prev_data["0"][i.toString()]);
+      };
      };
+
+     return ret;
     };
 
-    return ret;
-   };
+    //now go through the data and get the array points to be plotted
+    let data_all = data_2016.filter(d => d["Cause"] == "All causes");
+    let data_heart = data_2016.filter(d => d["Cause"] == "Diseases of the heart");
+    let data_accidents = add_data(data_2016.filter(d => d["Cause"] == "Accidents"), data_heart);
+    let data_flu = add_data(data_2016.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents);
+    let data_suicide = add_data(data_2016.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
+    let data_drug = add_data(data_2016.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
+    let data_alcohol = add_data(data_2016.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
 
-   //now go through the data and get the array points to be plotted
-   let data_all = data_2016.filter(d => d["Cause"] == "All causes");
-   let data_heart = data_2016.filter(d => d["Cause"] == "Diseases of the heart");
-   let data_accidents = add_data(data_2016.filter(d => d["Cause"] == "Accidents"), data_heart);
-   let data_flu = add_data(data_2016.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents);
-   let data_suicide = add_data(data_2016.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
-   let data_drug = add_data(data_2016.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
-   let data_alcohol = add_data(data_2016.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
+    //get the 1999 data
+    let data_all_1999 = data_1999.filter(d => d["Cause"] == "All causes");
+    let data_heart_1999 = data_1999.filter(d => d["Cause"] == "Diseases of the heart");
+    let data_accidents_1999 = add_data(data_1999.filter(d => d["Cause"] == "Accidents"), data_heart_1999);
+    let data_flu_1999 = add_data(data_1999.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents_1999);
+    let data_suicide_1999 = add_data(data_1999.filter(d => d["Cause"] == "Intentional self-harm"), data_flu_1999);
+    let data_drug_1999 = add_data(data_1999.filter(d => d["Cause"] == "Drug-induced"), data_suicide_1999);
+    let data_alcohol_1999 = add_data(data_1999.filter(d => d["Cause"] == "Alcohol-induced"), data_drug_1999);
 
-   //get the 1999 data
-   let data_all_1999 = data_1999.filter(d => d["Cause"] == "All causes");
-   let data_heart_1999 = data_1999.filter(d => d["Cause"] == "Diseases of the heart");
-   let data_accidents_1999 = add_data(data_1999.filter(d => d["Cause"] == "Accidents"), data_heart_1999);
-   let data_flu_1999 = add_data(data_1999.filter(d => d["Cause"] == "Influenza and pneumonia"), data_accidents_1999);
-   let data_suicide_1999 = add_data(data_1999.filter(d => d["Cause"] == "Intentional self-harm"), data_flu_1999);
-   let data_drug_1999 = add_data(data_1999.filter(d => d["Cause"] == "Drug-induced"), data_suicide_1999);
-   let data_alcohol_1999 = add_data(data_1999.filter(d => d["Cause"] == "Alcohol-induced"), data_drug_1999);
+    //age group legend
+    // let age_legend = {
+    //  {
+    //   "index": 0,
+    //   "age group": "Under 1 year"
+    //  },
+    //  {
+    //   "index": 1,
+    //   "age group": "1 to 4"
+    //  },
+    //  {
+    //   "index": 2,
+    //   "age group": "5 to 14"
+    //  },
+    //  {
+    //   "index": 3,
+    //   "age group": "15 to 24"
+    //  },
+    //  {
+    //   "index": 4,
+    //   "age group": "25 to 34"
+    //  },
+    //  {
+    //   "index": 5,
+    //   "age group": "35 to 44"
+    //  },
+    //  {
+    //   "index": 6,
+    //   "age group": "45 to 54"
+    //  },
+    //  {
+    //   "index": 7,
+    //   "age group": "55 to 64"
+    //  },
+    //  {
+    //   "index": 8,
+    //   "age group": "65 to 74"
+    //  },
+    //  {
+    //   "index": 9,
+    //   "age group": "75 to 84"
+    //  },
+    //  {
+    //   "index": 10,
+    //   "age group": "85 and above"
+    //  }
+    // };
 
-   //age group legend
-   // let age_legend = {
-   //  {
-   //   "index": 0,
-   //   "age group": "Under 1 year"
-   //  },
-   //  {
-   //   "index": 1,
-   //   "age group": "1 to 4"
-   //  },
-   //  {
-   //   "index": 2,
-   //   "age group": "5 to 14"
-   //  },
-   //  {
-   //   "index": 3,
-   //   "age group": "15 to 24"
-   //  },
-   //  {
-   //   "index": 4,
-   //   "age group": "25 to 34"
-   //  },
-   //  {
-   //   "index": 5,
-   //   "age group": "35 to 44"
-   //  },
-   //  {
-   //   "index": 6,
-   //   "age group": "45 to 54"
-   //  },
-   //  {
-   //   "index": 7,
-   //   "age group": "55 to 64"
-   //  },
-   //  {
-   //   "index": 8,
-   //   "age group": "65 to 74"
-   //  },
-   //  {
-   //   "index": 9,
-   //   "age group": "75 to 84"
-   //  },
-   //  {
-   //   "index": 10,
-   //   "age group": "85 and above"
-   //  }
-   // };
-
-   //Define a function that populates an object array for the cause type,
-   //each object has x and y attributes.
-   function populate_array(cause_data, all_data) {
-    var ret = [];
-    var elt_i;
-    var elt_0 = {
-     x: 0.5,
-     y: cause_data["0"]["0"] / (all_data["0"]["0"]) * 100
-    };
-    var elt_1 = {
-     x: 2.5,
-     y: cause_data["0"]["1"] / (all_data["0"]["1"]) * 100
-    };
-    ret.push(elt_0);
-    ret.push(elt_1);
-
-    for (var i = 2; i < 11; i++) {
-     elt_i = {
-      x: (i - 1) * 10,
-      y: (cause_data["0"][i.toString()]) / (all_data["0"][i.toString()]) * 100
+    //Define a function that populates an object array for the cause type,
+    //each object has x and y attributes.
+    function populate_array(cause_data, all_data) {
+     var ret = [];
+     var elt_i;
+     var elt_0 = {
+      x: 0.5,
+      y: cause_data["0"]["0"] / (all_data["0"]["0"]) * 100
      };
-     ret.push(elt_i);
+     var elt_1 = {
+      x: 2.5,
+      y: cause_data["0"]["1"] / (all_data["0"]["1"]) * 100
+     };
+     ret.push(elt_0);
+     ret.push(elt_1);
+
+     for (var i = 2; i < 11; i++) {
+      elt_i = {
+       x: (i - 1) * 10,
+       y: (cause_data["0"][i.toString()]) / (all_data["0"][i.toString()]) * 100
+      };
+      ret.push(elt_i);
+     };
+     ret.push({
+      x: 90,
+      y: 0
+     }); //add a last point to close the region
+     ret.push({
+      x: 0,
+      y: 0
+     }); //add a last point to close the region
+     return ret;
     };
-    ret.push({
-     x: 90,
-     y: 0
-    }); //add a last point to close the region
-    ret.push({
-     x: 0,
-     y: 0
-    }); //add a last point to close the region
-    return ret;
-   };
-   plotLine(populate_array(data_all, data_all), colorScale("all"), svg);
-   plotLine(populate_array(data_alcohol, data_all), colorScale("alcohol"), svg);
-   plotLine(populate_array(data_drug, data_all), colorScale("drug"), svg);
-   plotLine(populate_array(data_suicide, data_all), colorScale("suicide"), svg);
-   plotLine(populate_array(data_flu, data_all), colorScale("flu"), svg);
-   plotLine(populate_array(data_accidents, data_all), colorScale("accidents"), svg);
-   plotLine(populate_array(data_heart, data_all), colorScale("heart"), svg);
+    plotLine(populate_array(data_all, data_all), colorScale("all"), svg);
+    plotLine(populate_array(data_alcohol, data_all), colorScale("alcohol"), svg);
+    plotLine(populate_array(data_drug, data_all), colorScale("drug"), svg);
+    plotLine(populate_array(data_suicide, data_all), colorScale("suicide"), svg);
+    plotLine(populate_array(data_flu, data_all), colorScale("flu"), svg);
+    plotLine(populate_array(data_accidents, data_all), colorScale("accidents"), svg);
+    plotLine(populate_array(data_heart, data_all), colorScale("heart"), svg);
 
 
-   plotLine(populate_array(data_all_1999, data_all_1999), colorScale("all"), svg_1999);
-   plotLine(populate_array(data_alcohol_1999, data_all_1999), colorScale("alcohol"), svg_1999);
-   plotLine(populate_array(data_drug_1999, data_all_1999), colorScale("drug"), svg_1999);
-   plotLine(populate_array(data_suicide_1999, data_all_1999), colorScale("suicide"), svg_1999);
-   plotLine(populate_array(data_flu_1999, data_all_1999), colorScale("flu"), svg_1999);
-   plotLine(populate_array(data_accidents_1999, data_all_1999), colorScale("accidents"), svg_1999);
-   plotLine(populate_array(data_heart_1999, data_all_1999), colorScale("heart"), svg_1999);
+    plotLine(populate_array(data_all_1999, data_all_1999), colorScale("all"), svg_2016);
+    plotLine(populate_array(data_alcohol_1999, data_all_1999), colorScale("alcohol"), svg_2016);
+    plotLine(populate_array(data_drug_1999, data_all_1999), colorScale("drug"), svg_2016);
+    plotLine(populate_array(data_suicide_1999, data_all_1999), colorScale("suicide"), svg_2016);
+    plotLine(populate_array(data_flu_1999, data_all_1999), colorScale("flu"), svg_2016);
+    plotLine(populate_array(data_accidents_1999, data_all_1999), colorScale("accidents"), svg_2016);
+    plotLine(populate_array(data_heart_1999, data_all_1999), colorScale("heart"), svg_2016);
 
-   //Create the legend
-   colorScale.domain().forEach(function(d, i) {
-    d3.select("#simpleLegend")
-     .append("span").text(d)
-     .style("color", colorScale(d));
-   });
-   //TODO now plot heatmap!
-   let hm_xScale = d3.scaleLinear()
-    .domain([1999, 2016])
-    .range([0, width]);
-   let hm_yScale = d3.scaleLinear()
-    .domain([0, 10])
-    .range([0, height]);
-   console.log("1999 DATA");
-   console.log(data_1999);
-   let gridSize = hm_xScale(2000);
-   heart_data.forEach(function(d, i) {
-    var yr = Number(d["Year"]);
-    for (var i = 0; i < 11; i++) {
-     svg_heart.append('rect')
-      .attr('x', hm_xScale(yr))
-      .attr('y', hm_yScale(i))
-      .attr('width', gridSize - 5)
-      .attr('height', gridSize)
-      .style('fill', 'lightgrey');
+    //Create the legend
+    colorScale.domain().forEach(function(d, i) {
+     d3.select("#simpleLegend")
+      .append("span").text(d)
+      .style("color", colorScale(d));
+    });
+    //TODO now plot heatmap!
+    //Define a function that is the derivative of the percentage for different age groups for the specific cause
+    // [cause] is the string, [age_group] is the numerical index representing the age group
+    function get_derivative(cause, age_group) {
+     //NOTE returns an array
+     var ret = [];
+     // define previous year and current year datasets
+     var prev_year_all;
+     var curr_year_all;
+     var prev_year_cause;
+     var curr_year_all;
+
+     for (var i = 2000; i < 2017; i++) {
+      prev_year_all = data.filter(d => (d["Year"] == (i - 1) && d["Cause"] == "All causes"));
+      curr_year_all = data.filter(d => (d["Year"] == i && d["Cause"] == "All causes"));
+      prev_year_cause = data.filter(d => (d["Year"] == (i - 1) && d["Cause"] == cause));
+      curr_year_cause = data.filter(d => (d["Year"] == i && d["Cause"] == cause));
+      ret.push(curr_year_cause["0"][age_group.toString()] / curr_year_all["0"][age_group.toString()] -
+       prev_year_cause["0"][age_group.toString()] / prev_year_all["0"][age_group.toString()]);
+     };
+     return ret;
     };
+    let heat_width = svg_heart.attr("width");
+    let heat_height = svg_heart.attr("height");
+    let hm_xScale = d3.scaleLinear()
+     .domain([2000, 2016])
+     .range([0, heat_width]);
+    let hm_yScale = d3.scaleLinear()
+     .domain([0, 10])
+     .range([0, heat_height]);
+    //NOTE to use the heatmap colorscale we need to normalize data to between 0 and 1
+    var heatScale = d3.scaleSequential(d3.interpolateRdYlGn);
+    let gridSize = hm_xScale(2001) - 5;
+    heart_data.forEach(function(d, i) {
+     console.log(i);
+     var yr = Number(d["Year"]);
+     var percent_arr;
+     for (var j = 2; j < 8; j++) {
+      percent_arr = get_derivative("Diseases of the heart", j);
+      heatScale.domain(d3.extent(percent_arr));
+      svg_heart.append('rect')
+       .attr('x', hm_xScale(yr))
+       .attr('y', gridSize * (j - 2) + j * 5)
+       .attr('width', gridSize)
+       .attr('height', gridSize)
+       .style('fill', heatScale(percent_arr[i]));
+     };
+    });
    });
-  });
- </script>
-
+  </script>
+ </div>
 </body>
 
 
