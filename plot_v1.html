@@ -327,7 +327,8 @@
      .domain(age_array)
      .range([heat_height - hm_margin.bottom + 10, hm_margin.top]);
     //NOTE to use the heatmap colorscale we need to normalize data to between 0 and 1
-    var heatScale = d3.scaleSequential(d3.interpolateReds);
+    var heatScaleRed = d3.scaleSequential(d3.interpolateReds);
+    var heatScaleGreen = d3.scaleSequential(d3.interpolateGreens);
     let gridSize = 23;
 
     //create the x and y axes
@@ -357,37 +358,59 @@
     svg_drug.append("g")
      .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
      .call(hm_bottomAxis);
+
+    // //separately get the range of all three datasets
+    // var all_percentages = [];
+    // for (var j = 2; j < 8; j++) {
+    //  all_percentages = all_percentages.concat(get_derivative("Diseases of the heart", j));
+    //  all_percentages = all_percentages.concat(get_derivative("Intentional self-harm", j));
+    //  all_percentages = all_percentages.concat(get_derivative("Drug-induced", j));
+    // };
+    // var minMax = d3.extent(all_percentages);
+    // heatScaleRed.domain([0, minMax[1]]);
+    // heatScaleGreen.domain([0, -minMax[0]]);
+
     //Create a function to plot the heatmaps for specific causes
     //[cause] is a string representing the cause of death we are plotting
     function plot_hm(cause, svg_cause) {
      var yr;
      var percent_arr = [];
      var row;
+     var value;
+     var color;
+     var minMax;
      //Need to get minmax of the whole array to define the scale domain
+     console.log(cause);
      for (var j = 2; j < 8; j++) {
-      console.log(get_derivative(cause, j));
       percent_arr = percent_arr.concat(get_derivative(cause, j));
+      console.log("AGE GROUP");
+      console.log(j);
+      console.log(get_derivative(cause, j));
      };
-     console.log(percent_arr);
-     heatScale.domain(d3.extent(percent_arr));
-     // percent_arr = get_derivative("Diseases of the heart", j);
+     minMax = d3.extent(percent_arr);
+     heatScaleRed.domain([0, minMax[1]]);
+     heatScaleGreen.domain([0, -minMax[0]]);
      percent_arr.forEach(function(d, i) {
       yr = i % 17 + 2000;
       row = Math.floor(i / 17);
-      console.log(row);
-
+      value = percent_arr[i];
+      if (value >= 0) {
+       color = heatScaleRed(value);
+      } else {
+       color = heatScaleGreen(-value);
+      };
       let rect = svg_cause.append('rect')
        .attr('x', hm_xScale(yr) - 10)
-       .attr('y', gridSize * (row) + row * 7)
+       .attr('y', heat_height - (gridSize * (row) + row * 7) - 50)
        .attr('width', gridSize)
        .attr('height', gridSize)
-       .style('fill', heatScale(percent_arr[i]));
+       .style('fill', color);
       rect.on("mouseover", function() {
        svg_cause.append("text")
         // IDs have strict requirements on allowable characters ( https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id )
         .attr("id", "label") // We need to be able to find this to remove it later, so lets store an ID
         .attr("x", hm_xScale(yr) - 10)
-        .attr("y", gridSize * (row) + row * 7)
+        .attr("y", heat_height - (gridSize * (row) + row * 7))
         .text(percent_arr[i]);
 
       });
