@@ -40,7 +40,7 @@
   <svg id="fig2" height=400 width=500 style="background-color: ghostwhite">
   </svg>
   <div id="simpleLegend" class="legend"> </div>
-  <br>
+  <!-- <br>
   Here is the heatmap for percentage changes in heart-related deaths across the
   age groups over the years. <br>
   <svg id="fig3" height=200 width=550 style="background-color: ghostwhite">
@@ -55,12 +55,20 @@
   age groups over the years. <br>
   <svg id="fig5" height=200 width=550 style="background-color: ghostwhite">
   </svg>
+  <br>
+  <svg id="fig6" height=100 width=550 style="background-color: ghostwhite">
+  </svg> -->
+  <br><br>
+  <svg id="fig7" height=700 width=550 style="background-color: ghostwhite">
+  </svg>
   <script>
    let svg = d3.select("svg#fig2");
    let svg_2016 = d3.select("svg#fig1");
-   let svg_heart = d3.select("svg#fig3");
-   let svg_suicide = d3.select("svg#fig4");
-   let svg_drug = d3.select("svg#fig5");
+   // let svg_heart = d3.select("svg#fig3");
+   // let svg_suicide = d3.select("svg#fig4");
+   // let svg_drug = d3.select("svg#fig5");
+   // let svg_timeline = d3.select("svg#fig6");
+   let big_svg = d3.select("svg#fig7");
 
    d3.json("p1_data.json").then(function(data) {
     //first build the dataset for 2016
@@ -311,15 +319,15 @@
     };
 
     let hm_margin = {
-     top: 10,
+     top: 0,
      right: 40,
      bottom: 20,
      left: 30
     };
     //we need an array mapping row to age group for axis label
     let age_array = ["", "5-14", "15-24", "25-34", "35-44", "45-54", "55-64"];
-    let heat_width = svg_heart.attr("width");
-    let heat_height = svg_heart.attr("height");
+    let heat_width = 550;
+    let heat_height = 200;
     let hm_xScale = d3.scaleLinear()
      .domain([1999, 2017])
      .range([hm_margin.left, heat_width - hm_margin.right]);
@@ -334,41 +342,43 @@
     //create the x and y axes
     let hm_bottomAxis = d3.axisBottom(hm_xScale).ticks(5).tickSize(0);
     let hm_leftAxis = d3.axisLeft(hm_yScale).tickSize(0);
-    //append to the first svg
-    svg_heart.append("g")
-     .attr("transform", "translate(" + 40 + ", 0" + ")")
-     .call(hm_leftAxis);
-    svg_heart.append("g")
-     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
-     .call(hm_bottomAxis);
+    let hm_topAxis = d3.axisTop(hm_xScale).ticks(5).tickSize(0);
 
-    //append to the second svg
-    svg_suicide.append("g")
-     .attr("transform", "translate(" + 40 + ", 0" + ")")
-     .call(hm_leftAxis);
-    svg_suicide.append("g")
-     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
-     .call(hm_bottomAxis);
+    // //append to the first svg
+    // svg_heart.append("g")
+    //  .attr("transform", "translate(" + 40 + ", 0" + ")")
+    //  .call(hm_leftAxis);
+    // svg_heart.append("g")
+    //  .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+    //  .call(hm_bottomAxis);
+    //
+    // //append to the second svg
+    // svg_suicide.append("g")
+    //  .attr("transform", "translate(" + 40 + ", 0" + ")")
+    //  .call(hm_leftAxis);
+    // svg_suicide.append("g")
+    //  .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+    //  .call(hm_bottomAxis);
+    //
+    //
+    // //append to the drug svg
+    // svg_drug.append("g")
+    //  .attr("transform", "translate(" + 40 + ", 0" + ")")
+    //  .call(hm_leftAxis);
+    // svg_drug.append("g")
+    //  .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+    //  .call(hm_bottomAxis);
 
-
-    //append to the drug svg
-    svg_drug.append("g")
-     .attr("transform", "translate(" + 40 + ", 0" + ")")
-     .call(hm_leftAxis);
-    svg_drug.append("g")
-     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
-     .call(hm_bottomAxis);
-
-    // //separately get the range of all three datasets
-    // var all_percentages = [];
-    // for (var j = 2; j < 8; j++) {
-    //  all_percentages = all_percentages.concat(get_derivative("Diseases of the heart", j));
-    //  all_percentages = all_percentages.concat(get_derivative("Intentional self-harm", j));
-    //  all_percentages = all_percentages.concat(get_derivative("Drug-induced", j));
-    // };
-    // var minMax = d3.extent(all_percentages);
-    // heatScaleRed.domain([0, minMax[1]]);
-    // heatScaleGreen.domain([0, -minMax[0]]);
+    //separately get the range of all three datasets
+    var all_percentages = [];
+    for (var j = 2; j < 8; j++) {
+     all_percentages = all_percentages.concat(get_derivative("Diseases of the heart", j));
+     all_percentages = all_percentages.concat(get_derivative("Intentional self-harm", j));
+     all_percentages = all_percentages.concat(get_derivative("Drug-induced", j));
+    };
+    var minMax = d3.extent(all_percentages);
+    heatScaleRed.domain([0, minMax[1]]);
+    heatScaleGreen.domain([0, -minMax[0]]);
 
     //Create a function to plot the heatmaps for specific causes
     //[cause] is a string representing the cause of death we are plotting
@@ -387,9 +397,9 @@
       console.log(j);
       console.log(get_derivative(cause, j));
      };
-     minMax = d3.extent(percent_arr);
-     heatScaleRed.domain([0, minMax[1]]);
-     heatScaleGreen.domain([0, -minMax[0]]);
+     // minMax = d3.extent(percent_arr);
+     // heatScaleRed.domain([0, minMax[1]]);
+     // heatScaleGreen.domain([0, -minMax[0]]);
      percent_arr.forEach(function(d, i) {
       yr = i % 17 + 2000;
       row = Math.floor(i / 17);
@@ -423,10 +433,105 @@
 
      });
     };
-    plot_hm("Diseases of the heart", svg_heart);
-    plot_hm("Intentional self-harm", svg_suicide);
-    plot_hm("Drug-induced", svg_drug);
+    // plot_hm("Diseases of the heart", svg_heart);
+    // plot_hm("Intentional self-harm", svg_suicide);
+    // plot_hm("Drug-induced", svg_drug);
 
+
+    big_svg.append('rect')
+     .attr("x", hm_xScale(2008) - 11)
+     .attr("y", 250)
+     .attr("height", 175)
+     .attr("width", 80)
+     .style("fill", "lightblue")
+     .attr("opacity", 0.5);
+
+    //I want to have a giant SVG and have all the three heatmaps as layers
+    let heartLayer = big_svg.append("g")
+     .attr("height", 200)
+     .attr("width", 550)
+     .attr("transform", "translate(0, 50)");
+
+    let suicideLayer = big_svg.append("g")
+     .attr("height", 200)
+     .attr("width", 550)
+     .attr("transform", "translate(0, 250)");
+
+    let drugLayer = big_svg.append("g")
+     .attr("height", 200)
+     .attr("width", 550)
+     .attr("transform", "translate(0, 450)");
+
+
+    plot_hm("Diseases of the heart", heartLayer);
+    plot_hm("Intentional self-harm", suicideLayer);
+    plot_hm("Drug-induced", drugLayer);
+
+    //append to the drug svg
+    drugLayer.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+    drugLayer.append("g")
+     .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
+     .call(hm_bottomAxis);
+
+    heartLayer.append("g")
+     .attr("transform", "translate(0,-10)")
+     .call(hm_topAxis);
+    heartLayer.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+    suicideLayer.append("g")
+     .attr("transform", "translate(" + 40 + ", 0" + ")")
+     .call(hm_leftAxis);
+
+    //Now draw the timeline
+    big_svg.append("text")
+     .attr("id", "FC")
+     .attr("x", hm_xScale(2008) - 20)
+     .attr("y", 680)
+     .text("Financial Crisis");
+    var FCWidth = d3.select("#FC").node().getComputedTextLength();
+    big_svg.append("text")
+     .attr("id", "ML")
+     .attr("x", hm_xScale(2012) - 50)
+     .attr("y", 700)
+     .text("Marijuana Legalization");
+    var MLWidth = d3.select("#FC").node().getComputedTextLength();
+
+    big_svg.append("line")
+     .style("stroke", "black") // colour the line
+     .style("stroke-dasharray", ("3, 3"))
+     .attr("opacity", 0.2)
+     .attr("x1", hm_xScale(2008) - 11) // x position of the first end of the line
+     .attr("y1", 650) // y position of the first end of the line
+     .attr("x2", hm_xScale(2008) - 11) // x position of the second end of the line
+     .attr("y2", 425); // y position of the second end of the line
+
+    big_svg.append("line")
+     .style("stroke", "black") // colour the line
+     .style("stroke-dasharray", ("3, 3"))
+     .attr("opacity", 0.2)
+     .attr("x1", hm_xScale(2010) + 15) // x position of the first end of the line
+     .attr("y1", 650) // y position of the first end of the line
+     .attr("x2", hm_xScale(2010) + 15) // x position of the second end of the line
+     .attr("y2", 425); // y position of the second end of the line
+
+    big_svg.append("line")
+     .style("stroke", "black") // colour the line
+     .attr("opacity", 0.2)
+     .attr("x1", hm_xScale(2008) - 25) // x position of the first end of the line
+     .attr("y1", 670) // y position of the first end of the line
+     .attr("x2", hm_xScale(2008) - 11) // x position of the second end of the line
+     .attr("y2", 650); // y position of the second end of the line
+
+    big_svg.append("line")
+     .style("stroke", "black") // colour the line
+     .attr("opacity", 0.2)
+     .attr("x1", hm_xScale(2008) - 20 + FCWidth) // x position of the first end of the line
+     .attr("y1", 670) // y position of the first end of the line
+     .attr("x2", hm_xScale(2010) + 15) // x position of the second end of the line
+     .attr("y2", 650); // y position of the second end of the line
    });
   </script>
  </div>
