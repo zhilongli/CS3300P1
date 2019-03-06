@@ -98,7 +98,7 @@
      .domain([0, 100])
      .range([height - margin.bottom, margin.top]);
 
-    let colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    let colorScale = d3.scaleOrdinal(d3.schemePaired);
 
     // let xTicks = ["All", "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54",
     //  "55-64", "65-74", "75-84", ">85"
@@ -484,7 +484,7 @@
     svg_color.append("text").text("0").attr("x",120).attr("y",70).style("font-size","15px");
     svg_color.append("text").text("Decreased").attr("x",10).attr("y",70).style("font-size","15px").style("fill", "green");
     svg_color.append("text").text("Increased").attr("x",185).attr("y",70).style("font-size","15px").style("fill", "red");
-    
+
 
     big_svg.append('rect')
      .attr("x", hm_xScale(2008) - 11)
