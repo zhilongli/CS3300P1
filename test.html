@@ -1,0 +1,80 @@
+<html>
+
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>INFO 3300: P1
+ </title>
+ <h2>CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
+
+ <script src="https://d3js.org/d3.v5.min.js"></script>
+
+ <style>
+  .legend span {
+   margin-right: 10px;
+  }
+
+  .content {
+   max-width: 1050px;
+   margin: auto;
+  }
+
+  div {
+   text-align: justify;
+   text-justify: inter-word;
+  }
+ </style>
+</head>
+
+<body>
+  <svg id="fig1" height=500 width=500>
+  </svg>
+  <script>
+    let svg_color = d3.select("svg#fig1");
+    let defs = svg_color.append("defs");
+    let linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
+
+    linearGradient
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "100%")
+      .attr("y2", "0%");
+
+    //Set the color for the start
+    linearGradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#006600");
+
+    //Set the color for the middle
+    linearGradient.append("stop")
+      .attr("offset", "50%")
+      .attr("stop-color", "#ffffff");
+    //set color for end
+    linearGradient.append("stop")
+      .attr("offset","100%")
+      .attr("stop-color","#ff1a1a");
+
+    svg_color.append('rect')
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", 100)
+      .attr("width", 250)
+      .style("stroke", "black")
+      .style("fill", "ghostwhite")
+      .style("stroke-width",2);
+
+    svg_color.append("rect")
+      .attr("x",25)
+      .attr("y",40)
+      .attr("width", 200)
+      .attr("height", 10)
+      .style("fill", "url(#linear-gradient)");
+
+    svg_color.append("text").text("Chart Legend").attr("x",80).attr("y",25).style("font-size","15px");
+    svg_color.append("text").text("0").attr("x",120).attr("y",70).style("font-size","15px");
+    svg_color.append("text").text("Decreased").attr("x",10).attr("y",70).style("font-size","15px").style("fill", "green");
+    svg_color.append("text").text("Increased").attr("x",185).attr("y",70).style("font-size","15px").style("fill", "red");
+
+  </script>
+</body>
+</html>

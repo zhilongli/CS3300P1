@@ -59,7 +59,9 @@
   <svg id="fig6" height=100 width=550 style="background-color: ghostwhite">
   </svg> -->
   <br><br>
-  <svg id="fig7" height=700 width=550 style="background-color: ghostwhite">
+  <svg id="fig7" height=700 width=500 style="background-color: ghostwhite">
+  </svg>
+  <svg id="colorBar" height =100 width =250 style="background-color:ghostwhite">
   </svg>
   <script>
    let svg = d3.select("svg#fig2");
@@ -69,6 +71,7 @@
    // let svg_drug = d3.select("svg#fig5");
    // let svg_timeline = d3.select("svg#fig6");
    let big_svg = d3.select("svg#fig7");
+   let svg_color = d3.select('svg#colorbar')
 
    d3.json("p1_data.json").then(function(data) {
     //first build the dataset for 2016
@@ -431,12 +434,57 @@
 
       //TODO now need to create a colorbar for the color legend
 
+
      });
     };
     // plot_hm("Diseases of the heart", svg_heart);
     // plot_hm("Intentional self-harm", svg_suicide);
     // plot_hm("Drug-induced", svg_drug);
+    let defs = svg_color.append("defs");
+    let linearGradient = defs.append("linearGradient")
+      .attr("id", "linear-gradient");
 
+    linearGradient
+      .attr("x1", "0%")
+      .attr("y1", "0%")
+      .attr("x2", "100%")
+      .attr("y2", "0%");
+
+    //Set the color for the start
+    linearGradient.append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#006600");
+
+    //Set the color for the middle
+    linearGradient.append("stop")
+      .attr("offset", "50%")
+      .attr("stop-color", "#ffffff");
+    //set color for end
+    linearGradient.append("stop")
+      .attr("offset","100%")
+      .attr("stop-color","#ff1a1a");
+
+    svg_color.append('rect')
+      .attr("x", 0)
+      .attr("y", 0)
+      .attr("height", 100)
+      .attr("width", 250)
+      .style("stroke", "black")
+      .style("fill", "ghostwhite")
+      .style("stroke-width",2);
+
+    svg_color.append("rect")
+      .attr("x",25)
+      .attr("y",40)
+      .attr("width", 200)
+      .attr("height", 10)
+      .style("fill", "url(#linear-gradient)");
+
+    svg_color.append("text").text("Chart Legend").attr("x",80).attr("y",25).style("font-size","15px");
+    svg_color.append("text").text("0").attr("x",120).attr("y",70).style("font-size","15px");
+    svg_color.append("text").text("Decreased").attr("x",10).attr("y",70).style("font-size","15px").style("fill", "green");
+    svg_color.append("text").text("Increased").attr("x",185).attr("y",70).style("font-size","15px").style("fill", "red");
+    
 
     big_svg.append('rect')
      .attr("x", hm_xScale(2008) - 11)
