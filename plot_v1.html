@@ -22,9 +22,9 @@
   for each age group in the heatmap below.
   <p>
   <br><br>
-  <svg id="fig1" height=400 width=500 style="background-color: ghostwhite">
+  <svg id="fig1" height=400 width=500 style="background-color: #FFFFFF">
   </svg>
-  <svg id="fig2" height=400 width=500 style="background-color: ghostwhite">
+  <svg id="fig2" height=400 width=500 style="background-color: #FFFFFF">
   </svg>
   <div id="simpleLegend" class="legend"> </div>
   <!-- <br>
@@ -46,9 +46,9 @@
   <svg id="fig6" height=100 width=550 style="background-color: ghostwhite">
   </svg> -->
   <br><br>
-  <svg id="fig7" height=700 width=500 style="background-color: ghostwhite">
+  <svg id="fig7" height=700 width=500 style="background-color: #FFFFFF">
   </svg>
-  <svg id="colorBar" height =100 width =250 style="background-color:ghostwhite">
+  <svg id="colorBar" height =100 width =250 style="background-color:#FFFFFF">
   </svg>
   <script>
    let svg = d3.select("svg#fig2");
@@ -457,7 +457,7 @@
       .attr("height", 100)
       .attr("width", 250)
       .style("stroke", "black")
-      .style("fill", "ghostwhite")
+      .style("fill", "#FFFFFF")
       .style("stroke-width",2);
 
     svg_color.append("rect")
@@ -527,12 +527,20 @@
      .attr("y", 680)
      .text("Financial Crisis");
     var FCWidth = d3.select("#FC").node().getComputedTextLength();
+
     big_svg.append("text")
      .attr("id", "ML")
      .attr("x", hm_xScale(2012) - 50)
      .attr("y", 700)
      .text("Marijuana Legalization");
     var MLWidth = d3.select("#FC").node().getComputedTextLength();
+
+    big_svg.append("text")
+     .attr("id", "NE")
+     .attr("x", hm_xScale(2001) - 50)
+     .attr("y", 700)
+     .text("9/11");
+    var NEWidth = d3.select("#NE").node().getComputedTextLength();
 
     big_svg.append("line")
      .style("stroke", "black") // colour the line
