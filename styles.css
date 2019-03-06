@@ -1,4 +1,10 @@
 /* rounded corners code adapted from http://www.corelangs.com/css/box/shadow.html */
+
+*{
+  font-family: sans-serif;
+}
+
+
  #titletext{
    font-size: 40px;
    text-align: center;
@@ -33,6 +39,7 @@
  #fig7{
    margin-left: 275;
    margin-bottom: 30;
+   background-color: ghostwhite;
  }
 
  #text{
@@ -42,6 +49,6 @@
  }
  #colorBar{
    align-content: center;
-   margin-left: 400;
+   margin-left: 275;
    margin-bottom: 30;
  }

@@ -17,14 +17,16 @@
    United States in 1999, and the chart on the right shows the same data in 2016.
    From the charts we can observe some worrying trends: a significantly higher percentage
    of drug-related deaths, and higher rates of suicide among young people in 2016.
+   The x axis is the age and the y axis is the percentage of deaths.
+
    <br><br>
    How can we dig deeper into these trends? <br><br>Let us look at the years in which the percentages increased
-   for each age group in the heatmap below.
+   for each age group in the heatmap below, the y axis represents the age groups.
    <p>
     <br><br>
-    <svg id="fig1" height=400 width=500 style="background-color: ghostwhite">
+    <svg id="fig1" height=400 width=500 style="background-color: #FFFFFF">
     </svg>
-    <svg id="fig2" height=400 width=500 style="background-color: ghostwhite">
+    <svg id="fig2" height=400 width=500 style="background-color: #FFFFFF">
     </svg>
     <div id="simpleLegend" class="legend"> </div>
     <!-- <br>
@@ -46,9 +48,8 @@
   <svg id="fig6" height=100 width=550 style="background-color: ghostwhite">
   </svg> -->
     <br><br>
-    <svg id="fig7" height=700 width=500 style="background-color: ghostwhite">
+    <svg id="fig7" height=700 width=500 style="background-color: #FFFFFF">
     </svg>
-    <br>
     <svg id="colorBar" height=100 width=500 style="background-color:ghostwhite">
     </svg>
     <script>
@@ -60,7 +61,6 @@
      // let svg_timeline = d3.select("svg#fig6");
      let big_svg = d3.select("svg#fig7");
      let svg_color = d3.select('svg#colorbar')
-
      d3.json("p1_data.json").then(function(data) {
       //first build the dataset for 2016
       var heart_data = data.filter(d => d["Cause"] == "Diseases of the heart");
@@ -74,24 +74,19 @@
        bottom: 20,
        left: 50
       };
-
       let width = svg.attr("width");
       let height = svg.attr("height");
       //Create scales
       let xScale = d3.scaleLinear()
        .domain([0, 90])
        .range([margin.left, width - margin.right]);
-
       let yScale = d3.scaleLinear()
        .domain([0, 100])
        .range([height - margin.bottom, margin.top]);
-
       let colorScale = d3.scaleOrdinal(d3.schemePaired);
-
       // let xTicks = ["All", "<1", "1-4", "5-14", "15-24", "25-34", "35-44", "45-54",
       //  "55-64", "65-74", "75-84", ">85"
       // ];
-
       let xTicks = [1, 5, 15, 25, 35, 45, 55, 65, 75, 85];
       //create the x and y axes
       let bottomAxis = d3.axisBottom(xScale).tickValues(xTicks);
@@ -110,8 +105,6 @@
       svg_2016.append("g")
        .attr("transform", "translate(0," + (height - margin.bottom) + ")")
        .call(bottomAxis);
-
-
       //create a function to plot the lines, [arr] is the input data array with x and y values
       // element.x represents the age group and element.y represents the percentage of total deaths
       function plotLine(arr, color, svg_name) {
@@ -129,8 +122,6 @@
         .attr("d", line)
         .style("fill", color);
       };
-
-
       //Define a function to remove bad values and sum up with previous data
       function add_data(new_data, prev_data) {
        // console.log("OLD DATA");
@@ -160,10 +151,8 @@
          ret["0"][i.toString()] = (new_data["0"][i.toString()] + prev_data["0"][i.toString()]);
         };
        };
-
        return ret;
       };
-
       //now go through the data and get the array points to be plotted
       let data_all = data_2016.filter(d => d["Cause"] == "All causes");
       let data_heart = data_2016.filter(d => d["Cause"] == "Diseases of the heart");
@@ -172,7 +161,6 @@
       let data_suicide = add_data(data_2016.filter(d => d["Cause"] == "Intentional self-harm"), data_flu);
       let data_drug = add_data(data_2016.filter(d => d["Cause"] == "Drug-induced"), data_suicide);
       let data_alcohol = add_data(data_2016.filter(d => d["Cause"] == "Alcohol-induced"), data_drug);
-
       //get the 1999 data
       let data_all_1999 = data_1999.filter(d => d["Cause"] == "All causes");
       let data_heart_1999 = data_1999.filter(d => d["Cause"] == "Diseases of the heart");
@@ -181,7 +169,6 @@
       let data_suicide_1999 = add_data(data_1999.filter(d => d["Cause"] == "Intentional self-harm"), data_flu_1999);
       let data_drug_1999 = add_data(data_1999.filter(d => d["Cause"] == "Drug-induced"), data_suicide_1999);
       let data_alcohol_1999 = add_data(data_1999.filter(d => d["Cause"] == "Alcohol-induced"), data_drug_1999);
-
       //age group legend
       // let age_legend = {
       //  {
@@ -229,7 +216,6 @@
       //   "age group": "85 and above"
       //  }
       // };
-
       //Define a function that populates an object array for the cause type,
       //each object has x and y attributes.
       function populate_array(cause_data, all_data) {
@@ -245,7 +231,6 @@
        };
        ret.push(elt_0);
        ret.push(elt_1);
-
        for (var i = 2; i < 11; i++) {
         elt_i = {
          x: (i - 1) * 10,
@@ -270,8 +255,6 @@
       plotLine(populate_array(data_flu, data_all), colorScale("flu"), svg);
       plotLine(populate_array(data_accidents, data_all), colorScale("accidents"), svg);
       plotLine(populate_array(data_heart, data_all), colorScale("heart"), svg);
-
-
       plotLine(populate_array(data_all_1999, data_all_1999), colorScale("others"), svg_2016);
       plotLine(populate_array(data_alcohol_1999, data_all_1999), colorScale("alcohol"), svg_2016);
       plotLine(populate_array(data_drug_1999, data_all_1999), colorScale("drug"), svg_2016);
@@ -279,7 +262,6 @@
       plotLine(populate_array(data_flu_1999, data_all_1999), colorScale("flu"), svg_2016);
       plotLine(populate_array(data_accidents_1999, data_all_1999), colorScale("accidents"), svg_2016);
       plotLine(populate_array(data_heart_1999, data_all_1999), colorScale("heart"), svg_2016);
-
       //Create the legend
       colorScale.domain().forEach(function(d, i) {
        d3.select("#simpleLegend")
@@ -297,7 +279,6 @@
        var curr_year_all;
        var prev_year_cause;
        var curr_year_all;
-
        for (var i = 2000; i < 2017; i++) {
         prev_year_all = data.filter(d => (d["Year"] == (i - 1) && d["Cause"] == "All causes"));
         curr_year_all = data.filter(d => (d["Year"] == i && d["Cause"] == "All causes"));
@@ -308,7 +289,6 @@
        };
        return ret;
       };
-
       let hm_margin = {
        top: 0,
        right: 40,
@@ -329,12 +309,10 @@
       var heatScaleRed = d3.scaleSequential(d3.interpolateReds);
       var heatScaleGreen = d3.scaleSequential(d3.interpolateGreens);
       let gridSize = 23;
-
       //create the x and y axes
       let hm_bottomAxis = d3.axisBottom(hm_xScale).ticks(5).tickSize(0);
       let hm_leftAxis = d3.axisLeft(hm_yScale).tickSize(0);
       let hm_topAxis = d3.axisTop(hm_xScale).ticks(5).tickSize(0);
-
       // //append to the first svg
       // svg_heart.append("g")
       //  .attr("transform", "translate(" + 40 + ", 0" + ")")
@@ -359,7 +337,6 @@
       // svg_drug.append("g")
       //  .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
       //  .call(hm_bottomAxis);
-
       //separately get the range of all three datasets
       var all_percentages = [];
       for (var j = 2; j < 8; j++) {
@@ -370,7 +347,6 @@
       var minMax = d3.extent(all_percentages);
       heatScaleRed.domain([0, minMax[1]]);
       heatScaleGreen.domain([0, -minMax[0]]);
-
       //Create a function to plot the heatmaps for specific causes
       //[cause] is a string representing the cause of death we are plotting
       function plot_hm(cause, svg_cause) {
@@ -413,25 +389,24 @@
         //   .attr("x", hm_xScale(yr) - 10)
         //   .attr("y", heat_height - (gridSize * (row) + row * 7))
         //   .text(percent_arr[i]);
-        //
         // });
         // rect.on("mouseout", function() {
         //  d3.select("#label").remove();
         // });
-
-
+        //TODO now need to create a colorbar for the color legend
        });
       };
+      // plot_hm("Diseases of the heart", svg_heart);
+      // plot_hm("Intentional self-harm", svg_suicide);
+      // plot_hm("Drug-induced", svg_drug);
       let defs = svg_color.append("defs");
       let linearGradient = defs.append("linearGradient")
        .attr("id", "linear-gradient");
-
       linearGradient
        .attr("x1", "0%")
        .attr("y1", "0%")
        .attr("x2", "100%")
        .attr("y2", "0%");
-
       //Set the color for the start
       linearGradient.append("stop")
        .attr("offset", "0%")
@@ -467,7 +442,6 @@
       svg_color.append("text").text((minMax[0].toFixed(5) * 100).toString() + "%").attr("x", 10).attr("y", 70).style("font-size", "15px").style("fill", "green");
       svg_color.append("text").text((minMax[1].toFixed(5) * 100).toString() + "%").attr("x", 450).attr("y", 70).style("font-size", "15px").style("fill", "red");
 
-
       big_svg.append('rect')
        .attr("x", hm_xScale(2008) - 11)
        .attr("y", 248)
@@ -497,22 +471,17 @@
        .attr("height", 200)
        .attr("width", 550)
        .attr("transform", "translate(0, 50)");
-
       let suicideLayer = big_svg.append("g")
        .attr("height", 200)
        .attr("width", 550)
        .attr("transform", "translate(0, 250)");
-
       let drugLayer = big_svg.append("g")
        .attr("height", 200)
        .attr("width", 550)
        .attr("transform", "translate(0, 450)");
-
-
       plot_hm("Diseases of the heart", heartLayer);
       plot_hm("Intentional self-harm", suicideLayer);
       plot_hm("Drug-induced", drugLayer);
-
       //append to the drug svg
       drugLayer.append("g")
        .attr("transform", "translate(" + 40 + ", 0" + ")")
@@ -520,7 +489,6 @@
       drugLayer.append("g")
        .attr("transform", "translate(0," + (heat_height - hm_margin.bottom) + ")")
        .call(hm_bottomAxis);
-
       heartLayer.append("g")
        .attr("transform", "translate(0,-10)")
        .call(hm_topAxis);
@@ -530,7 +498,7 @@
       suicideLayer.append("g")
        .attr("transform", "translate(" + 40 + ", 0" + ")")
        .call(hm_leftAxis);
-
+      //Now draw the timeline
       //Now draw the timeline
       big_svg.append("text")
        .attr("id", "FC")
@@ -554,8 +522,6 @@
        .attr("x", hm_xScale(2002) - 20)
        .attr("y", 655)
        .text("9-11");
-      var MLWidth = d3.select("#FC").node().getComputedTextLength();
-
       big_svg.append("line")
        .style("stroke", "black") // colour the line
        .style("stroke-dasharray", ("3, 3"))
@@ -564,7 +530,6 @@
        .attr("y1", 650) // y position of the first end of the line
        .attr("x2", hm_xScale(2008) - 11) // x position of the second end of the line
        .attr("y2", 425); // y position of the second end of the line
-
       big_svg.append("line")
        .style("stroke", "black") // colour the line
        .style("stroke-dasharray", ("3, 3"))
@@ -573,7 +538,6 @@
        .attr("y1", 650) // y position of the first end of the line
        .attr("x2", hm_xScale(2010) + 15) // x position of the second end of the line
        .attr("y2", 425); // y position of the second end of the line
-
       big_svg.append("line")
        .style("stroke", "black") // colour the line
        .attr("opacity", 0.2)
@@ -581,7 +545,6 @@
        .attr("y1", 670) // y position of the first end of the line
        .attr("x2", hm_xScale(2008) - 11) // x position of the second end of the line
        .attr("y2", 650); // y position of the second end of the line
-
       big_svg.append("line")
        .style("stroke", "black") // colour the line
        .attr("opacity", 0.2)
