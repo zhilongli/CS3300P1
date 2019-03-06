@@ -4,36 +4,23 @@
  <meta name="viewport" content="width=device-width, initial-scale=1">
  <title>INFO 3300: P1
  </title>
- <h2>CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
+ <h2 id = 'titletext' >CS/INFO 3300 Project 1: Static Data Visualization <br></h2>
 
+<link rel="stylesheet" type="text/css" href="styles.css">
  <script src="https://d3js.org/d3.v5.min.js"></script>
-
- <style>
-  .legend span {
-   margin-right: 10px;
-  }
-
-  .content {
-   max-width: 1050px;
-   margin: auto;
-  }
-
-  div {
-   text-align: justify;
-   text-justify: inter-word;
-  }
- </style>
 </head>
 
 <body>
  <div class="content">
+  <p id="text">
   The stacked line chart on the left shows the leading causes of death in the
   United States in 1999, and the chart on the right shows the same data in 2016.
   From the charts we can observe some worrying trends: a significantly higher percentage
   of drug-related deaths, and higher rates of suicide among young people in 2016.
-  <br>
-  How can we dig deeper into these trends? Let us look at the years in which the percentages increased
+  <br><br>
+  How can we dig deeper into these trends? <br><br>Let us look at the years in which the percentages increased
   for each age group in the heatmap below.
+  <p>
   <br><br>
   <svg id="fig1" height=400 width=500 style="background-color: ghostwhite">
   </svg>
